@@ -5,8 +5,8 @@ thickness = 0.9;
 innerDepth = depth - thickness;
 
 // Space allowed for the rf board
-board_width = 18.8;
-board_height = 1.3;
+board_width = 18.65;
+board_height = 1.2;
 // Space allowed for plug on the rf board
 plug_opening_width_top = 8;
 plug_opening_width_bottom = 7;
@@ -41,6 +41,8 @@ module trapezoid(a, b, h, d) {
 }
 
 
+translate([0, 0, depth])
+mirror([0, 0, 1])
 difference() {
     union() {
         // Base bottom
