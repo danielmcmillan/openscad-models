@@ -342,7 +342,10 @@ module enclosure() {
         if (bottom) translate([0, shell_thickness, shell_thickness]) {
             // Inner wall
             translate([0, 0, pcb_bottom_clearance/2+inner_join_size/2-overlap]) cube([inner_wall_thickness, inner_wall_height, inner_height-inner_join_size-pcb_bottom_clearance/2-inner_join_size/2-lid_post_tolerance]);
-            translate([0, inner_join_size-overlap, 0]) cube([inner_wall_thickness, inner_depth/2-inner_join_size*1.5+overlap, inner_wall_height]);
+            translate([0, inner_join_size-overlap, 0]) difference() {
+                cube([inner_wall_thickness, inner_depth/2-inner_join_size*1.5+overlap, inner_wall_height]);
+                translate([-overlap, 20.4, inner_wall_height-1.0]) cube([inner_wall_thickness+2*overlap, 31, 1.0+overlap]);
+            }
             translate([0, inner_depth/2+inner_join_size/2-overlap, 0]) cube([inner_wall_thickness, inner_depth/2-inner_join_size*1.5+overlap, inner_wall_height]);
             // Joints
             inner_wall_joint(raise=pcb_bottom_clearance/2-inner_join_size/2);
@@ -397,6 +400,8 @@ pcb_depth=140.4-2.1;
                     translate([6.8, 2.1, -3.1-3.1]) cube([14.5, 4.7, 3.1]);
                     translate([29.3-4.1, 0, -5.9]) cube([4.1, 2.1, 5.9]);
                 }
+                // Wifi module
+                translate([142, 22.5, 0]) mirror([0, 0, 1]) cube([29.9, 30.8, 4.0]);
             }
             translate([0, -overlap, -overlap]) {
                 translate([-overlap, 0, 0])
