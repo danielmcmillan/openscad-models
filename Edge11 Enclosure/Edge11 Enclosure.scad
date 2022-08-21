@@ -20,8 +20,8 @@ lip_overlap=4.0;
 lip_thickness=0.8;
 lip_tolerance=0.04; // Shrink the lip slightly to fit top easily
 
-foot_r=4.5;
-foot_depth=0.4;
+foot_r=4.4;
+foot_depth=0.6;
 foot_spacing=16;
 
 inner_width=273.6+1.7+2.6;
@@ -57,7 +57,8 @@ lid_post_tolerance=0.04; // Reduce the height slightly to ensure it's tight
 lid_post_screw_head_r=3.0;
 lid_post_screw_head_depth=3.8;
 lid_post_female_r=3.8;
-lid_post_nut_depth=2.0;
+lid_post_nut_r=3.2;
+lid_post_nut_depth=2.2;
 lid_post_nut_height=2.6;
 lid_post_margin=shell_thickness+lip_thickness+lip_tolerance+lid_post_female_r;
 lid_post_bottom_height=9.4;
@@ -107,17 +108,14 @@ power_jack_spacing=2.8;
 power_jack_z=shell_thickness+power_jack_raised;
 
 // Power button
-power_button_cutout_r=2.8;
-power_button_cutout_inner_r=1.8;
-power_button_cutout_arm_width=0.8;
-power_button_cutout_thickness=0.8;
-power_button_cutout_depth=shell_thickness-power_button_cutout_thickness;
-power_button_height=4.9;
+power_button_cutout_r=1.8;
+power_button_cutout_thickness=0.6;
+power_button_height=4.8;
 power_button_width=6.0;
 power_button_x=outer_width-shell_thickness-lip_thickness-power_button_width/2-shell_thickness+overlap;
 power_button_y=outer_depth-27.0;
 power_button_lead_gap=2.5;
-power_button_stand_height=outer_height-shell_thickness-power_button_height+power_button_cutout_depth;
+power_button_stand_height=outer_height-power_button_height;
 power_button_stand_wall_height=2.2;
 
 // Inner join between sides
@@ -199,7 +197,7 @@ module enclosure() {
                     translate([0, shell_thickness+power_jack_width, 0])
                         cube([power_jack_depth+0.8, shell_thickness, power_jack_raised+power_jack_height]);
                     // Back half wall
-                    translate([0, 0, 0])
+                    translate([0, power_jack_width/2+shell_thickness, 0])
                         cube([0.8, power_jack_width/2+shell_thickness, power_jack_raised+power_jack_height]);
                 }
             }
@@ -217,7 +215,7 @@ module enclosure() {
                         // cylinder(h=lid_post_top_height, r=lid_post_female_r);
                         translate([-lid_post_female_r, -lid_post_female_r, 0]) cube([lid_post_female_r*2, lid_post_female_r*2, lid_post_top_height]);
                         translate([0, 0, -overlap]) cylinder(h=lid_post_top_height, r=1.7);
-                        translate([0, 0, lid_post_nut_depth]) cylinder(h=lid_post_nut_height, r=3.1, $fn=6);
+                        translate([0, 0, lid_post_nut_depth]) cylinder(h=lid_post_nut_height, r=lid_post_nut_r, $fn=6);
                     }
                     border_thickness=lid_post_margin-shell_thickness-lid_post_female_r;
                     for (d = [0, 90, 180, 270]) {
@@ -269,16 +267,10 @@ module enclosure() {
             cube([lip_thickness+overlap, power_jack_width, inner_height-power_jack_z]);
 
         // Cutout for power button
-        translate([power_button_x, power_button_y, outer_height-shell_thickness-overlap]) difference() {
+        translate([power_button_x, power_button_y, outer_height-shell_thickness-overlap]) {
             cylinder(h=shell_thickness+2*overlap, r=power_button_cutout_r);
-            translate([0, 0, shell_thickness-power_button_cutout_thickness+overlap]) {
-                cylinder(h=power_button_cutout_thickness, r=power_button_cutout_inner_r);
-                for (dz=[0, -120, +120]) {
-                    rotate([0, 0, dz])
-                    translate([-power_button_cutout_arm_width/2, 0, 0])
-                        cube([power_button_cutout_arm_width, power_button_cutout_r+overlap, power_button_cutout_thickness]);
-                }
-            }
+            translate([0, 0, power_button_cutout_thickness/2])
+                cube([power_button_width+1, power_button_width+1, power_button_cutout_thickness+overlap], center=true);
         }
 
         // Fan exhaust
