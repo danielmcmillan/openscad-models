@@ -1,9 +1,9 @@
 use <MCAD/boxes.scad>
 use <standoff.scad>
-// $fa=1;
-// $fs=0.4;
 $fa=1;
-$fs=1;
+$fs=0.4;
+// $fa=1;
+// $fs=1;
 overlap=0.005;
 // Todo:
 // Decide whether to allow for anything else (wifi antennas, internal usb, 2nd hdd)
@@ -49,7 +49,7 @@ standoffs=[
     [273.6+2.6-20.0-pcb_hole_r, 79.8+3.3+pcb_hole_r, 0.0], // H11
     [273.6+1.9-41.4-pcb_hole_r, 138.2-4.0+2.5-5.6+1.7-9.9-pcb_hole_r, 0.0], // H12
     [162.5-5.0, 79.8-3.9-3.7, 2.5], // HD1
-    [162.5+96.0+hdd_hole_r, hdd_hole_r, 4.1] // HD2
+    [162.5+97.5+hdd_hole_r, hdd_hole_r, 4.1] // HD2
 ];
 
 // Screw posts
@@ -101,9 +101,9 @@ sd_z=pcb_z+pcb_thickness+0.3;
 
 power_jack_width=12.5;
 power_jack_height=10.2;
-power_jack_depth=12.7;
-power_jack_radius=5.0;
-power_jack_raised=3.4;
+power_jack_depth=11.7;
+power_jack_radius=5.5;
+power_jack_raised=4.4;
 power_jack_spacing=2.8;
 power_jack_z=shell_thickness+power_jack_raised;
 
@@ -184,21 +184,21 @@ module enclosure() {
                 translate([outer_width-shell_thickness-lip_thickness, sd_y-port_clearance-shell_thickness, shell_thickness])
                     cube([lip_thickness, usb2_y-(sd_y-port_clearance-shell_thickness)+usb_width+port_clearance+shell_thickness, outer_bottom_height-shell_thickness]);
                 // Power jack enclosure
-                translate([outer_width-shell_thickness-power_jack_depth-0.8+overlap, inner_depth-power_jack_width-shell_thickness-power_jack_spacing, shell_thickness-overlap]) {
+                translate([outer_width-shell_thickness-lip_tolerance+overlap, inner_depth-power_jack_width-shell_thickness-power_jack_spacing, shell_thickness-overlap]) mirror([1, 0, 0]) {
                     // Feet
                     union() {
-                        cube([shell_thickness+0.8, power_jack_width+2*shell_thickness, power_jack_raised]);
-                        translate([(power_jack_depth+0.8)/2, 0, 0]) cube([shell_thickness, power_jack_width+2*shell_thickness, power_jack_raised]);
-                        translate([power_jack_depth, 0, 0]) cube([shell_thickness, power_jack_width+2*shell_thickness, power_jack_raised]);
+                        cube([shell_thickness, power_jack_width+2*shell_thickness, power_jack_raised]);
+                        translate([(power_jack_depth-shell_thickness)/2, 0, 0]) cube([shell_thickness, power_jack_width+2*shell_thickness, power_jack_raised]);
+                        translate([power_jack_depth-shell_thickness, power_jack_width/2+shell_thickness, 0]) cube([shell_thickness, power_jack_width/2+shell_thickness+overlap, power_jack_raised]);
                     }
                     // Right wall
-                    cube([power_jack_depth+0.8, shell_thickness, power_jack_raised+power_jack_height]);
+                    cube([power_jack_depth/2+shell_thickness/2, shell_thickness, outer_bottom_height-shell_thickness+lip_exposed]);
                     // Left wall
                     translate([0, shell_thickness+power_jack_width, 0])
-                        cube([power_jack_depth+0.8, shell_thickness, power_jack_raised+power_jack_height]);
-                    // Back half wall
-                    translate([0, power_jack_width/2+shell_thickness, 0])
-                        cube([0.8, power_jack_width/2+shell_thickness, power_jack_raised+power_jack_height]);
+                        cube([power_jack_depth+0.8, shell_thickness, outer_bottom_height-shell_thickness+lip_exposed]);
+                    // Back wall
+                    translate([power_jack_depth, power_jack_width+shell_thickness+overlap, 0]) mirror([0, 1, 0])
+                        cube([0.8, power_jack_width/4, outer_bottom_height-shell_thickness+lip_exposed]);
                 }
             }
             // Lid screw posts
@@ -287,8 +287,8 @@ module enclosure() {
         // Top ventilation
         top_ventilation_margin=lid_post_female_r*2+lip_thickness*2+shell_thickness*2;
         top_ventilation_angle=10;
-        top_ventilation_vent_width=2.8;
-        top_ventilation_gap_width=3.6;
+        top_ventilation_vent_width=2.2;
+        top_ventilation_gap_width=4.2;
         intersection() {
             difference() {
                 translate([top_ventilation_margin, top_ventilation_margin, outer_height-shell_thickness-overlap])
@@ -329,12 +329,18 @@ module enclosure() {
     }
     // Power button
     if (bottom) {
+        difference() {
     translate([power_button_x-power_button_width/2, power_button_y-power_button_width/2, shell_thickness-overlap]) {
         cube([power_button_width, power_button_width, power_button_stand_height-shell_thickness]);
         for (ty = [-shell_thickness+overlap, power_button_width-overlap]) translate([0, ty, 0])
             cube([power_button_width, shell_thickness, power_button_stand_height-shell_thickness+power_button_stand_wall_height]);
-        for (tx = [-shell_thickness+overlap, power_button_width-overlap]) translate([tx, power_button_width/2-power_button_lead_gap/2, 0])
+                for (tx = [-shell_thickness+overlap, power_button_width-overlap]) translate([tx, power_button_width/2-power_button_lead_gap/2, 0]) {
             cube([shell_thickness, power_button_lead_gap, power_button_stand_height-shell_thickness+power_button_stand_wall_height]);
+                }
+                translate([-shell_thickness, 0, 0]) cube([shell_thickness, power_button_width, power_button_stand_height/1.50]);
+            }
+            translate([power_button_x-power_button_width/2-shell_thickness-overlap, power_button_y, shell_thickness+power_button_stand_height/2])
+                rotate([0, 90, 0]) cylinder(r=0.9, h=power_button_width/2);
         }
     }
 
@@ -419,7 +425,7 @@ pcb_depth=140.4-2.1;
                 translate([111.9, 64.1, 0])
                     cube([30, 33.5, 1.3+2*overlap]);
                 translate([outer_width-pcb_x-shell_thickness, 54.3+4.0+overlap, 0])
-                    mirror([1, 0, 0]) cube([2.6+11.0, pcb_depth-54.3-4.0+overlap, 1.3+2*overlap]);
+                    mirror([1, 0, 0]) cube([2.6+10.5, pcb_depth-54.3-4.0+overlap, 1.3+2*overlap]);
             }
 
         }
