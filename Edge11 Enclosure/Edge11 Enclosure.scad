@@ -195,14 +195,13 @@ module enclosure() {
                     cube([power_jack_depth/2+shell_thickness/2, shell_thickness, outer_bottom_height-shell_thickness+lip_exposed]);
                     // Left wall
                     translate([0, shell_thickness+power_jack_width, 0])
-                        cube([power_jack_depth+0.8, shell_thickness, outer_bottom_height-shell_thickness+lip_exposed]);
+                        cube([power_jack_depth+0.8, shell_thickness+power_jack_spacing-lip_tolerance, outer_bottom_height-shell_thickness+lip_exposed]);
                     // Back wall
                     translate([power_jack_depth, power_jack_width+shell_thickness+overlap, 0]) mirror([0, 1, 0])
                         cube([0.8, power_jack_width/4, outer_bottom_height-shell_thickness+lip_exposed]);
                 }
             }
             // Lid screw posts
-            // if (top) translate([70, shell_thickness+lid_post_female_r+lip_thickness+0.5, outer_height-shell_thickness])
             for (pos = lid_post_pos) {
                 if (bottom) translate([pos[0], pos[1], 0]) {
                     cylinder(r=lid_post_screw_head_r+0.8, h=lid_post_screw_head_depth);
@@ -212,7 +211,6 @@ module enclosure() {
                 if (top) translate([pos[0], pos[1], lid_post_bottom_height+lid_post_tolerance+overlap]) {
                     lid_post_top_height=outer_height-lid_post_bottom_height-shell_thickness-lid_post_tolerance;
                     difference() {
-                        // cylinder(h=lid_post_top_height, r=lid_post_female_r);
                         translate([-lid_post_female_r, -lid_post_female_r, 0]) cube([lid_post_female_r*2, lid_post_female_r*2, lid_post_top_height]);
                         translate([0, 0, -overlap]) cylinder(h=lid_post_top_height, r=1.7);
                         translate([0, 0, lid_post_nut_depth]) cylinder(h=lid_post_nut_height, r=lid_post_nut_r, $fn=6);
@@ -222,7 +220,24 @@ module enclosure() {
                         rotate([0, 0, d]) translate([lid_post_female_r-overlap, -lid_post_female_r-border_thickness, lid_post_top_height]) mirror([0, 0, 1])
                             cube([border_thickness+2*overlap, lid_post_female_r*2+2*border_thickness, outer_height-outer_bottom_height-shell_thickness-lip_exposed-lip_tolerance]);
                     }
-                    // standoff(height=inner_height/2-lid_post_tolerance, inner_r=2.0, outer_r=3.2, fillet_x=3.2, depth=7.0);
+                }
+            }
+            // Bracing
+            bracing_size=shell_thickness*1.5;
+            translate([shell_thickness-overlap, shell_thickness-overlap, shell_thickness-overlap]) {
+                for (flip_x = [0, 1]) translate([flip_x*(inner_width), 0, 0]) mirror([flip_x, 0, 0])
+                    difference() {
+                        cube([lid_post_margin-shell_thickness, lid_post_margin-shell_thickness, lid_post_bottom_height-shell_thickness]);
+                        translate([lid_post_margin-shell_thickness, lid_post_margin-shell_thickness, 0]) cylinder(r=2.5-overlap, h=lid_post_bottom_height);
+                    }
+                translate([0, inner_depth-bracing_size*2, 0]) cube([bracing_size*2, bracing_size*2, outer_bottom_height-shell_thickness]);
+                for (tx = [0, inner_width-bracing_size+overlap*2]) translate([tx, 0, 0])
+                    cube([bracing_size, inner_depth, bracing_size]);
+                difference() {
+                    for (ty = [0, inner_depth/2-bracing_size/2, inner_depth-bracing_size+overlap*2]) translate([0, ty, 0])
+                        cube([inner_width, bracing_size, bracing_size]);
+                    translate([split_x-shell_thickness-inner_join_size*2, inner_depth/2-inner_join_size/2, inner_join_size/2-inner_join_nut_r])
+                        cube([inner_join_size*2+outer_width-split_x-12, inner_join_size+overlap*2, inner_join_size+overlap*2]);
                 }
             }
         }
@@ -291,8 +306,8 @@ module enclosure() {
         top_ventilation_gap_width=4.2;
         intersection() {
             difference() {
-                translate([top_ventilation_margin, top_ventilation_margin, outer_height-shell_thickness-overlap])
-                    cube([outer_width-2*top_ventilation_margin, outer_depth-2*top_ventilation_margin, shell_thickness+2*overlap]);
+                translate([split_x, top_ventilation_margin, outer_height-shell_thickness-overlap])
+                    cube([outer_width-split_x-top_ventilation_margin, outer_depth-2*top_ventilation_margin, shell_thickness+2*overlap]);
                 translate([split_x, outer_depth/2, outer_height-shell_thickness/2])
                     cube([2*top_ventilation_margin, outer_depth, shell_thickness+2*overlap], center=true);
                 translate([outer_width/2, outer_depth/2, outer_height-shell_thickness/2])
